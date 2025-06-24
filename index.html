@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Teste RTE</title>
+<style>
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 20px
+    }
+
+    .Pessoa {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .Filhos {
+        margin-left: 25px;
+        margin-top: 15px;
+    }
+
+    button {
+        margin-top: 5px;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+<h2>Cadastro de Pessoas e Filhos</h2>
+
+<div class="add-pessoa">
+    <input type="text" id="Nome-Pessoa" placeholder="Nome da Pessoa"/>
+    <button onclick="adicionar_pessoa()">Adicionar Pessoa</button>
+</div>
+<div id="Lista_Pessoas"></div>
+<div class="pessoas-cadastrada">
+    <button onclick="gerarJSON()">Gerar Lista</button>
+</div>
+<pre id="outputJSON" style="background: white; padding: 10px;"></pre>
+
+<script>
+    let pessoas = [];
+
+    function adicionar_pessoa() {
+        const nome = document.getElementById('Nome-Pessoa').value.trim();
+        if (nome === '') {
+            alert('Por favor, insira o nome da pessoa.');
+            return;
+        }
+        const pessoa = {
+            id: Date.now(),
+            nome: nome,
+            filhos: []
+        };
+        pessoas.push(pessoa);
+        document.getElementById('Nome-Pessoa').value = '';
+        mostrar_pessoas();
+    }
+
+    function remover_pessoa(id) {
+        pessoas = pessoas.filter(p => p.id !== id);
+        mostrar_pessoas();
+    }
+
+    function add_filho(pessoaId) {
+        const nome_filho = prompt('Nome do Filho:'); 
+        if (nome_filho && nome_filho.trim() !== '') {
+            const pessoa = pessoas.find(p => p.id === pessoaId);
+            if (pessoa) {
+                pessoa.filhos.push({ id: Date.now(), nome: nome_filho.trim() });
+                mostrar_pessoas();
+            }
+        }
+    }
+
+    function remover_filho(pessoaId, filhoId) {
+        const pessoa = pessoas.find(p => p.id === pessoaId);
+        if (pessoa) {
+            pessoa.filhos = pessoa.filhos.filter(f => f.id !== filhoId);
+            mostrar_pessoas();
+        }
+    }
+
+    function mostrar_pessoas() {
+        const container = document.getElementById('Lista_Pessoas');
+        container.innerHTML = '';
+
+        pessoas.forEach(p => {
+            const divPessoa = document.createElement('div');
+            divPessoa.className = 'Pessoa';
+
+            divPessoa.innerHTML = `<strong>${p.nome}</strong>
+                <button onclick="remover_pessoa(${p.id})">Remover Pessoa</button>
+                <br/>
+                <button onclick="add_filho(${p.id})">Adicionar Filho</button>`;
+            if (p.filhos.length > 0) {
+                const divFilhos = document.createElement('div');
+                divFilhos.className = 'Filhos';
+
+                p.filhos.forEach(f => {
+                    const spanFilho = document.createElement('div');
+                    spanFilho.innerHTML = `${f.nome} <button onclick="remover_filho(${p.id}, ${f.id})">Remover Filho</button>`;
+                    divFilhos.appendChild(spanFilho);
+                });
+                divPessoa.appendChild(divFilhos);
+            }
+
+            container.appendChild(divPessoa);
+        });
+    }
+
+    function gerarJSON() {
+        const jsonString = JSON.stringify(pessoas, null, 2);
+        document.getElementById('outputJSON').textContent = jsonString;
+    }
+</script>
+</body>
+</html>
